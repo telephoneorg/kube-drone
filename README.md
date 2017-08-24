@@ -10,7 +10,7 @@ kubectl create secret generic drone \
 
 * Create drone:
 ```bash
-kubectl create -f *.yaml
+kubectl create -f .
 ```
 
 * Label a node or nodes with drone=true
