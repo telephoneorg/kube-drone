@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: drone
+data:
+  drone.open: 'true'
+  drone.host: https://drone.valuphone.com
+  drone.github: 'true'
+  drone.github.client: c5114df3c4e2be7ade01
+  drone.orgs: telephoneorg
+  drone.admin: joeblackwaslike
+  drone.server: ws://localhost:8000/ws/broker

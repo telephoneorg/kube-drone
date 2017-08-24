@@ -1,0 +1,99 @@
+apiVersion: apps/v1beta1
+kind: StatefulSet
+metadata:
+  name: drone
+spec:
+  updateStrategy:
+    type: RollingUpdate
+  serviceName: drone
+  template:
+    metadata:
+      labels:
+        app: drone
+        project: telephoneorg
+        environment: production
+    spec:
+      terminationGracePeriodSeconds: 10
+      nodeSelector:
+        drone: 'true'
+      containers:
+      - name: server
+        image: drone/drone:0.7
+        env:
+        - name: DRONE_OPEN
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.open
+        - name: DRONE_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.host
+        - name: DRONE_GITHUB
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.github
+        - name: DRONE_GITHUB_CLIENT
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.github.client
+        - name: DRONE_ORGS
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.orgs
+        - name: DRONE_ADMIN
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.admin
+        - name: DRONE_GITHUB_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone
+              key: drone.github.secret
+        - name: DRONE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone
+              key: drone.secret
+        ports:
+        - containerPort: 8000
+        volumeMounts:
+        - name: drone-data
+          mountPath: /var/lib/drone
+      - name: agent
+        image: drone/drone:0.7
+        args:
+        - agent
+        env:
+        - name: DRONE_SERVER
+          valueFrom:
+            configMapKeyRef:
+              name: drone
+              key: drone.server
+        - name: DRONE_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: drone
+              key: drone.secret
+        volumeMounts:
+        - name: docker-mount
+          mountPath: /var/run/
+      volumes:
+      - name: docker-mount
+        hostPath:
+          path: /var/run/alt-docker
+  volumeClaimTemplates:
+  - metadata:
+      name: drone-data
+    spec:
+      storageClassName: local-storage
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 50Gi
