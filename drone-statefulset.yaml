@@ -17,6 +17,14 @@ spec:
       nodeSelector:
         drone: 'true'
       containers:
+      - name: docker
+        image: docker:dind
+        imagePullPolicy: IfNotPresent
+        args:
+        - --storage-driver=overlay2
+        volumeMounts:
+        - name: var-run
+          mountPath: /var/run
       - name: server
         image: drone/drone:0.7
         env:
@@ -81,17 +89,19 @@ spec:
               name: drone
               key: drone.secret
         volumeMounts:
-        - name: docker-mount
-          mountPath: /var/run/
+        - name: var-run
+          mountPath: /var/run
       volumes:
-      - name: docker-mount
-        hostPath:
-          path: /var/run/alt-docker
+      # - name: var-run
+      #   hostPath:
+      #     path: /var/run/alt-docker
+      - name: var-run
+        emptyDir:
+          medium: memory
   volumeClaimTemplates:
   - metadata:
       name: drone-data
     spec:
-      storageClassName: local-storage
       accessModes:
       - ReadWriteOnce
       resources:

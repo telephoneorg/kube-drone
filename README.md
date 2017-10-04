@@ -1,4 +1,4 @@
-# drone-kube
+# kube-drone
 
 ## Usage
 * Create a secret for github oauth creds:
@@ -17,13 +17,3 @@ kubectl create -f .
 ```bash
 kubectl label ${NODE} drone=true
 ```
-
-### Gotchas
-
-#### Problem
-Running a separate docker daemon on nodes that drone=true
-
-#### Answer
-Install alt-docker on all nodes where labels `drone=true`
-* git clone https://github.com/joeblackwaslike/alt-docker
-* `cd alt-docker && ./install.sh`
