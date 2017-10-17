@@ -14,8 +14,15 @@ spec:
         environment: production
     spec:
       terminationGracePeriodSeconds: 10
-      nodeSelector:
-        drone: 'true'
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: ci-server
+                operator: In
+                values:
+                - 'true'
       containers:
       - name: docker
         image: docker:dind
@@ -25,6 +32,8 @@ spec:
         volumeMounts:
         - name: var-run
           mountPath: /var/run
+        securityContext:
+          privileged: true
       - name: server
         image: drone/drone:0.7
         env:
@@ -42,12 +51,12 @@ spec:
           valueFrom:
             configMapKeyRef:
               name: drone
-              key: drone.github
+              key: github
         - name: DRONE_GITHUB_CLIENT
           valueFrom:
             configMapKeyRef:
               name: drone
-              key: drone.github.client
+              key: github.client
         - name: DRONE_ORGS
           valueFrom:
             configMapKeyRef:
@@ -62,7 +71,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: drone
-              key: drone.github.secret
+              key: github.secret
         - name: DRONE_SECRET
           valueFrom:
             secretKeyRef:
@@ -92,12 +101,9 @@ spec:
         - name: var-run
           mountPath: /var/run
       volumes:
-      # - name: var-run
-      #   hostPath:
-      #     path: /var/run/alt-docker
       - name: var-run
         emptyDir:
-          medium: memory
+          medium: Memory
   volumeClaimTemplates:
   - metadata:
       name: drone-data
